@@ -1,4 +1,31 @@
 package com.autoflex.inventory.controller;
 
+import com.autoflex.inventory.dto.ProductRawMaterialDTO;
+import com.autoflex.inventory.service.ProductRawMaterialService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/product-raw-materials")
+@RequiredArgsConstructor
 public class ProductRawMaterialController {
+
+    private final ProductRawMaterialService service;
+
+    @PostMapping
+    public ProductRawMaterialDTO create(@RequestBody ProductRawMaterialDTO dto) {
+        return service.create(dto);
+    }
+
+    @GetMapping("/product/{productId}")
+    public List<ProductRawMaterialDTO> findByProduct(@PathVariable Long productId) {
+        return service.findByProduct(productId);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        service.delete(id);
+    }
 }

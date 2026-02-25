@@ -1,6 +1,8 @@
-package com.autoflex.inventory.dto;
+package com.autoflex.inventory.mapper;
 
+import com.autoflex.inventory.dto.ProductDTO;
 import com.autoflex.inventory.entity.Product;
+import org.mapstruct.Mapper;
 
 
 @Mapper(componentModel = "spring")
