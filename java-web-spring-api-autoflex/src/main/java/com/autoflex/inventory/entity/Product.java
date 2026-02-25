@@ -21,7 +21,7 @@ public class Product {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, precision = 15, scale = 2)
+    @Column(name = "price", nullable = false, precision = 15, scale = 2)
     private BigDecimal value;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
