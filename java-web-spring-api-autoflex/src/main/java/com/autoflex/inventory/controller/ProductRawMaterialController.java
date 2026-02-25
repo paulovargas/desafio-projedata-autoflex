@@ -9,6 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/product-raw-materials")
+@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class ProductRawMaterialController {
 

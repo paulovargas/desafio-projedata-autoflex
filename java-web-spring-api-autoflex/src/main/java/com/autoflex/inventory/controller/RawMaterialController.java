@@ -10,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/raw-materials")
+@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class RawMaterialController {
 
