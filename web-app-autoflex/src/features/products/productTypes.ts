@@ -3,3 +3,8 @@ export interface Product {
   name: string
   value: number
 }
+
+export interface ProductPayload {
+  name: string
+  value: number
+}
