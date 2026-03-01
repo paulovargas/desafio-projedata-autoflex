@@ -5,7 +5,6 @@ import com.autoflex.inventory.entity.RawMaterial;
 import com.autoflex.inventory.mapper.RawMaterialMapper;
 import com.autoflex.inventory.repository.RawMaterialRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,11 +31,7 @@ public class RawMaterialService {
     }
 
     public RawMaterialDTO create(RawMaterialDTO dto) {
-//        RawMaterial entity = mapper.toEntity(dto);
-//        return mapper.toDTO(repository.save(entity));
-        System.out.println("DTO recebido: " + dto.getName());
         RawMaterial entity = mapper.toEntity(dto);
-        System.out.println("Entity gerado: " + entity.getName());
         return mapper.toDTO(repository.save(entity));
     }
 

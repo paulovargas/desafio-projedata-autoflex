@@ -20,9 +20,20 @@ public class ProductRawMaterialController {
         return service.create(dto);
     }
 
+    @GetMapping("/{id}")
+    public ProductRawMaterialDTO findById(@PathVariable Long id) {
+        return service.findById(id);
+    }
+
     @GetMapping("/product/{productId}")
     public List<ProductRawMaterialDTO> findByProduct(@PathVariable Long productId) {
         return service.findByProduct(productId);
+    }
+
+    @PutMapping("/{id}")
+    public ProductRawMaterialDTO update(@PathVariable Long id,
+                                        @RequestBody ProductRawMaterialDTO dto) {
+        return service.update(id, dto);
     }
 
     @DeleteMapping("/{id}")

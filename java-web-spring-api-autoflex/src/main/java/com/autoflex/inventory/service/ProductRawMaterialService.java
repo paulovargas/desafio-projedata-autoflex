@@ -36,28 +36,56 @@ public class ProductRawMaterialService {
                 .build();
 
         ProductRawMaterial saved = repository.save(entity);
+        return toDTO(saved);
+    }
 
-        return ProductRawMaterialDTO.builder()
-                .id(saved.getId())
-                .productId(product.getId())
-                .rawMaterialId(rawMaterial.getId())
-                .requiredQuantity(saved.getRequiredQuantity())
-                .build();
+    public ProductRawMaterialDTO findById(Long id) {
+        ProductRawMaterial entity = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product raw material relation not found"));
+
+        return toDTO(entity);
     }
 
     public List<ProductRawMaterialDTO> findByProduct(Long productId) {
         return repository.findByProductId(productId)
                 .stream()
-                .map(entity -> ProductRawMaterialDTO.builder()
-                        .id(entity.getId())
-                        .productId(entity.getProduct().getId())
-                        .rawMaterialId(entity.getRawMaterial().getId())
-                        .requiredQuantity(entity.getRequiredQuantity())
-                        .build())
+                .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    public ProductRawMaterialDTO update(Long id, ProductRawMaterialDTO dto) {
+        ProductRawMaterial existing = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product raw material relation not found"));
+
+        if (dto.getProductId() != null) {
+            Product product = productRepository.findById(dto.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Product not found"));
+            existing.setProduct(product);
+        }
+
+        if (dto.getRawMaterialId() != null) {
+            RawMaterial rawMaterial = rawMaterialRepository.findById(dto.getRawMaterialId())
+                    .orElseThrow(() -> new RuntimeException("Raw material not found"));
+            existing.setRawMaterial(rawMaterial);
+        }
+
+        if (dto.getRequiredQuantity() != null) {
+            existing.setRequiredQuantity(dto.getRequiredQuantity());
+        }
+
+        return toDTO(repository.save(existing));
     }
 
     public void delete(Long id) {
         repository.deleteById(id);
+    }
+
+    private ProductRawMaterialDTO toDTO(ProductRawMaterial entity) {
+        return ProductRawMaterialDTO.builder()
+                .id(entity.getId())
+                .productId(entity.getProduct().getId())
+                .rawMaterialId(entity.getRawMaterial().getId())
+                .requiredQuantity(entity.getRequiredQuantity())
+                .build();
     }
 }
