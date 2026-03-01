@@ -1,7 +1,7 @@
 package com.autoflex.inventory.controller;
 
 import com.autoflex.inventory.dto.ProductDTO;
-import com.autoflex.inventory.dto.ProductionResultDTO;
+import com.autoflex.inventory.dto.ProductionSimulationResponseDTO;
 import com.autoflex.inventory.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -44,7 +44,7 @@ public class ProductController {
     }
 
     @GetMapping("/production")
-    public List<ProductionResultDTO> calculateProduction() {
+    public ProductionSimulationResponseDTO calculateProduction() {
         return service.calculateProduction();
     }
 }

@@ -4,13 +4,13 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Getter
 @Builder
-public class ProductionResultDTO {
+public class ProductionSimulationResponseDTO {
 
-    private Long productId;
-    private String productName;
-    private Integer producibleQuantity;
+    private List<ProductionResultDTO> items;
+    private Integer totalProducibleQuantity;
     private BigDecimal totalValue;
 }

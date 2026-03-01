@@ -2,6 +2,7 @@ package com.autoflex.inventory.service;
 
 import com.autoflex.inventory.dto.ProductDTO;
 import com.autoflex.inventory.dto.ProductionResultDTO;
+import com.autoflex.inventory.dto.ProductionSimulationResponseDTO;
 import com.autoflex.inventory.entity.Product;
 import com.autoflex.inventory.entity.ProductRawMaterial;
 import com.autoflex.inventory.entity.RawMaterial;
@@ -60,7 +61,7 @@ public class ProductService {
         productRepository.deleteById(id);
     }
 
-    public List<ProductionResultDTO> calculateProduction() {
+    public ProductionSimulationResponseDTO calculateProduction() {
 
         List<Product> products =
                 productRepository.findAllByOrderByValueDesc();
@@ -83,6 +84,10 @@ public class ProductService {
 
             int maxProduction = Integer.MAX_VALUE;
 
+            if (relations.isEmpty()) {
+                maxProduction = 0;
+            }
+
             for (ProductRawMaterial relation : relations) {
 
                 BigDecimal available =
@@ -90,6 +95,13 @@ public class ProductService {
 
                 BigDecimal required =
                         relation.getRequiredQuantity();
+
+                if (available == null
+                        || required == null
+                        || required.compareTo(BigDecimal.ZERO) <= 0) {
+                    maxProduction = 0;
+                    break;
+                }
 
                 int possible =
                         available.divide(required, RoundingMode.DOWN)
@@ -121,10 +133,25 @@ public class ProductService {
                             .productId(product.getId())
                             .productName(product.getName())
                             .producibleQuantity(maxProduction)
+                            .totalValue(product.getValue()
+                                    .multiply(BigDecimal.valueOf(maxProduction)))
                             .build()
             );
         }
 
-        return result;
+        int totalProducibleQuantity = result.stream()
+                .mapToInt(item -> item.getProducibleQuantity() == null ? 0 : item.getProducibleQuantity())
+                .sum();
+
+        BigDecimal totalValue = result.stream()
+                .map(ProductionResultDTO::getTotalValue)
+                .filter(value -> value != null)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return ProductionSimulationResponseDTO.builder()
+                .items(result)
+                .totalProducibleQuantity(totalProducibleQuantity)
+                .totalValue(totalValue)
+                .build();
     }
 }
