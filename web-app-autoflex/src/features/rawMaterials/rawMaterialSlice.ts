@@ -5,8 +5,8 @@ import type { RawMaterial, RawMaterialPayload } from './rawMaterialTypes'
 type RawMaterialApi = {
   id: number
   name: string
+  stockQuantity?: number | string | null
   quantity?: number | null
-  value?: number | null
 }
 
 interface RawMaterialsState {
@@ -28,7 +28,7 @@ const initialState: RawMaterialsState = {
 const normalizeRawMaterial = (item: RawMaterialApi): RawMaterial => ({
   id: item.id,
   name: item.name,
-  quantity: Number(item.quantity ?? item.value ?? 0),
+  stockQuantity: Number(item.stockQuantity ?? item.quantity ?? 0),
 })
 
 export const fetchRawMaterials = createAsyncThunk<RawMaterial[]>(

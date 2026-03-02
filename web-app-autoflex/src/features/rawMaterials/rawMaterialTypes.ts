@@ -1,10 +1,10 @@
 export interface RawMaterial {
   id: number
   name: string
-  quantity: number
+  stockQuantity: number
 }
 
 export interface RawMaterialPayload {
   name: string
-  quantity: number
+  stockQuantity: number
 }

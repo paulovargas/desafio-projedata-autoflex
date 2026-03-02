@@ -39,7 +39,7 @@ export function RawMaterialsPage() {
 
   const isSubmitting = mutationStatus === 'loading'
   const isEditing = editingId !== null
-  const totalQuantity = items.reduce((sum, item) => sum + Number(item.quantity ?? 0), 0)
+  const totalQuantity = items.reduce((sum, item) => sum + Number(item.stockQuantity ?? 0), 0)
 
   const resetForm = () => {
     setName('')
@@ -59,9 +59,11 @@ export function RawMaterialsPage() {
 
     try {
       if (editingId !== null) {
-        await dispatch(updateRawMaterial({ id: editingId, name: trimmedName, quantity: parsedQuantity })).unwrap()
+        await dispatch(
+          updateRawMaterial({ id: editingId, name: trimmedName, stockQuantity: parsedQuantity })
+        ).unwrap()
       } else {
-        await dispatch(createRawMaterial({ name: trimmedName, quantity: parsedQuantity })).unwrap()
+        await dispatch(createRawMaterial({ name: trimmedName, stockQuantity: parsedQuantity })).unwrap()
       }
 
       resetForm()
@@ -77,7 +79,7 @@ export function RawMaterialsPage() {
 
     setEditingId(rawMaterial.id)
     setName(rawMaterial.name)
-    setQuantity(String(rawMaterial.quantity ?? 0))
+    setQuantity(String(rawMaterial.stockQuantity ?? 0))
     dispatch(clearRawMaterialsMutationState())
   }
 
@@ -239,7 +241,7 @@ export function RawMaterialsPage() {
                     <tr key={rawMaterial.id}>
                       <td>{rawMaterial.id}</td>
                       <td>{rawMaterial.name}</td>
-                      <td>{Number(rawMaterial.quantity ?? 0).toLocaleString('pt-BR')}</td>
+                      <td>{Number(rawMaterial.stockQuantity ?? 0).toLocaleString('pt-BR')}</td>
                       <td className="text-end">
                         <div
                           className="btn-group btn-group-sm"
