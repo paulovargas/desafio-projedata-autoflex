@@ -1,19 +1,68 @@
 version: '3.8'
 
 services:
-
   postgres:
     image: postgres:15
     container_name: autoflex-postgres
     restart: always
     environment:
-      POSTGRES_DB: inventory_dev
+      POSTGRES_DB: inventory_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./database/backups:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d inventory_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  restore:
+    image: postgres:15
+    container_name: autoflex-postgres-restore
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    environment:
+      PGPASSWORD: postgres
+    volumes:
+      - ./database/backups:/backups
+    command: >
+      sh -c "
+      if [ -f /backups/inventory_db.backup ]; then
+        echo 'Restoring backup /backups/inventory_db.backup...';
+        pg_restore -h postgres -U postgres -d inventory_db --clean --if-exists --no-owner --no-privileges /backups/inventory_db.backup;
+        echo 'Restore finished.';
+      else
+        echo 'No backup file found at /backups/inventory_db.backup. Skipping restore.';
+      fi
+      "
+
+  backup:
+    image: postgres:15
+    container_name: autoflex-postgres-backup
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: always
+    environment:
+      PGPASSWORD: postgres
+    volumes:
+      - ./database/backups:/backups
+    command: >
+      sh -c "
+      while true; do
+        echo 'Creating backup...';
+        pg_dump -h postgres -U postgres -d inventory_db -Fc -f /backups/inventory_db.backup.tmp &&
+        mv /backups/inventory_db.backup.tmp /backups/inventory_db.backup &&
+        echo 'Backup updated at /backups/inventory_db.backup';
+        sleep 60;
+      done
+      "
 
 volumes:
   postgres_data:
