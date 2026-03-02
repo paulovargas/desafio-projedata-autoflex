@@ -13,7 +13,7 @@ export function Sidebar({ dismissOnNavigate = false }: SidebarProps) {
         <img src={autoflexLogo} alt="Logo AutoFlex" className="img-fluid" />
       </div>
 
-      <nav className="nav nav-pills flex-column gap-1 p-1" aria-label="NavegaÃ§Ã£o principal">
+      <nav className="nav nav-pills flex-column gap-1 p-1" aria-label="Navegação principal">
         {navItems.map((item) => (
           <NavLink
             key={item.path}
