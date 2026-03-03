@@ -1,168 +1,178 @@
-# Autoflex Inventory Management System
+# Sistema de Controle de Estoque - Autoflex
 
-## 📌 Overview
+Projeto full stack do desafio tecnico Autoflex, com frontend React e backend Spring Boot para gestao de produtos, materias-primas, composicao de produto e simulacao de producao.
 
-This project was developed as part of the Autoflex technical challenge.
+## Visao geral
 
-The system manages products and their required raw materials, allowing:
+O sistema atende os fluxos principais:
 
--   CRUD operations for Products
--   CRUD operations for Raw Materials
--   Association between Products and Raw Materials
--   Calculation of producible products based on available stock
--   Prioritization of production by highest product value
--   Calculation of total production value
+- CRUD de produtos
+- CRUD de materias-primas
+- CRUD da composicao produto x materia-prima
+- Simulacao de producao com base no estoque atual
+- Priorizacao por maior valor de produto (na simulacao)
+- Dashboard com indicadores operacionais
 
-The application follows a clean architecture approach, separating
-back-end and front-end as required.
+## Arquitetura
 
-------------------------------------------------------------------------
+- Frontend: React + TypeScript + Redux Toolkit + React Router + Axios + Bootstrap
+- Backend: Spring Boot 2.7 + JPA/Hibernate + MapStruct + Maven
+- Banco de dados: PostgreSQL (perfil padrao `prod`) e H2 (perfil `dev`)
 
-## 🏗 Architecture
+## Estrutura do repositorio
 
-Frontend (React + Redux + TypeScript)\
-⬇\
-Backend (Spring Boot REST API)\
-⬇\
-PostgreSQL Database
+```text
+.
+|- java-web-spring-api-autoflex/   # API Spring Boot
+|- web-app-autoflex/               # App React (Vite)
+|- docker-compose.dev.yml          # Ambiente dev completo (db + api + web)
+|- REQUISITOS.md
+`- README.md
+```
 
-------------------------------------------------------------------------
+## Requisitos de ambiente
 
-## 🖥 Frontend
+- Docker Desktop
+- Java 11+
+- Maven 3.9+
+- Node.js 20+ (recomendado)
+- npm
 
-**Tech Stack**
+## Como executar
 
--   React
--   TypeScript
--   Redux Toolkit
--   React Router
--   Axios
--   Bootstrap 5
+### Opcao 1: ambiente completo com Docker (recomendado)
 
-Run frontend:
+Na raiz do repositorio:
 
-cd web-app-autoflex\
-npm install\
-npm run dev
+```powershell
+docker compose -f docker-compose.dev.yml up -d
+```
 
-Default URL: http://localhost:5173
+Servicos:
 
-------------------------------------------------------------------------
+- Frontend: `http://localhost:5173`
+- API: `http://localhost:8080/api`
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- PostgreSQL: `localhost:5432` (`inventory_db`)
 
-## ⚙ Backend
+Parar ambiente:
 
-**Tech Stack**
+```powershell
+docker compose -f docker-compose.dev.yml down
+```
 
--   Spring Boot
--   JPA / Hibernate
--   PostgreSQL
--   MapStruct
--   Maven
+### Opcao 2: execucao local por modulo
 
-Run backend:
+1. Subir PostgreSQL + restore/backup:
 
+```powershell
+cd java-web-spring-api-autoflex
+docker compose up -d
+```
+
+2. Subir backend:
+
+```powershell
+cd java-web-spring-api-autoflex
 mvn spring-boot:run
+```
 
-Default API URL: http://localhost:8080/api
+3. Subir frontend:
 
-------------------------------------------------------------------------
+```powershell
+cd web-app-autoflex
+npm install
+npm run dev
+```
 
-## 🗄 Database
+## Backup e restore (PostgreSQL)
 
-Database: PostgreSQL
+No compose do backend existe rotina automatica:
 
-Tables:
+- Restore automatico na subida, se existir `database/backups/inventory_db.backup`
+- Backup continuo a cada 60 segundos
+- Arquivo de backup em `java-web-spring-api-autoflex/database/backups/inventory_db.backup`
 
--   products
--   raw_materials
--   product_raw_materials
+Logs uteis:
 
-All database structures, columns, and code are written in English
-(RNF007 compliant).
+```powershell
+cd java-web-spring-api-autoflex
+docker compose logs -f postgres restore backup
+```
 
-------------------------------------------------------------------------
+## Rotas do frontend
 
-## 🧠 Business Rule -- Production Calculation
+- `/` dashboard
+- `/products` gestao de produtos e composicao
+- `/raw-materials` gestao de materias-primas
+- `/production` simulacao RF008
 
-The system calculates which products can be produced based on available
-raw materials.
+## Endpoints da API
 
-Algorithm logic:
+Base URL: `http://localhost:8080/api`
 
-1.  Products are ordered by highest value.
-2.  For each product:
-    -   The system verifies available raw materials.
-    -   Calculates maximum producible quantity.
-3.  Raw materials stock is reduced virtually during simulation.
-4.  The system returns:
-    -   Product name
-    -   Producible quantity
-    -   Total production value
+Produtos:
 
-This ensures prioritization of higher-value products when raw materials
-are shared.
+- `GET /products`
+- `GET /products/{id}`
+- `POST /products`
+- `PUT /products/{id}`
+- `DELETE /products/{id}`
+- `GET /products/production`
 
-------------------------------------------------------------------------
+Materias-primas:
 
-## 🔍 API Endpoints (Main)
+- `GET /raw-materials`
+- `GET /raw-materials/{id}`
+- `POST /raw-materials`
+- `PUT /raw-materials/{id}`
+- `DELETE /raw-materials/{id}`
 
-### Products
+Composicao produto x materia-prima:
 
--   GET /api/products
--   POST /api/products
--   PUT /api/products/{id}
--   DELETE /api/products/{id}
+- `POST /product-raw-materials`
+- `GET /product-raw-materials/{id}`
+- `GET /product-raw-materials/product/{productId}`
+- `PUT /product-raw-materials/{id}`
+- `DELETE /product-raw-materials/{id}`
 
-### Raw Materials
+Productions (modulo de registros de producao):
 
--   GET /api/raw-materials
--   POST /api/raw-materials
--   PUT /api/raw-materials/{id}
--   DELETE /api/raw-materials/{id}
+- `GET /productions`
+- `GET /productions/{id}`
+- `POST /productions`
+- `PUT /productions/{id}`
+- `DELETE /productions/{id}`
 
-### Product Composition
+## Regra de negocio da simulacao
 
--   POST /api/product-raw-materials
--   GET /api/product-raw-materials/product/{productId}
--   DELETE /api/product-raw-materials/{id}
+A simulacao (`GET /api/products/production`) segue este fluxo:
 
-### Production Simulation
+1. Ordena produtos por maior valor
+2. Calcula o maximo produzivel por produto com base nos insumos disponiveis
+3. Desconta o consumo no estoque simulado
+4. Retorna itens produziveis, quantidade total sugerida e valor total sugerido
 
--   GET /api/production
+## Scripts uteis
 
-------------------------------------------------------------------------
+Frontend (`web-app-autoflex/package.json`):
 
-## 📋 Requirements Compliance
+- `npm run dev`
+- `npm run build`
+- `npm run lint`
+- `npm run preview`
 
-✔ RNF001 -- Web platform\
-✔ RNF002 -- API architecture\
-✔ RNF003 -- Responsive frontend\
-✔ RNF004 -- PostgreSQL database\
-✔ RNF005 -- Spring Boot backend\
-✔ RNF006 -- React + Redux frontend\
-✔ RNF007 -- English code and database naming
+Backend (`java-web-spring-api-autoflex`):
 
-✔ RF001 -- Product CRUD\
-✔ RF002 -- Raw Material CRUD\
-✔ RF003 -- Association CRUD\
-✔ RF004 -- Production calculation\
-✔ RF005 -- Product UI\
-✔ RF006 -- Raw Material UI\
-✔ RF007 -- Composition UI\
-✔ RF008 -- Production UI
+- `mvn spring-boot:run`
+- `mvn test`
 
-------------------------------------------------------------------------
+## Pendencias e melhorias
 
-## 🚀 Possible Improvements
+- Suite de testes automatizados no frontend
+- Maior cobertura de testes de integracao no backend
+- Pipeline CI/CD
 
--   Unit tests (backend and frontend)
--   Integration tests (Cypress)
--   Docker containerization
--   CI/CD pipeline
--   Production deployment
+## Autor
 
-------------------------------------------------------------------------
-
-## 👤 Author
-
-Developed for Paulo Vargas.
+Paulo Vargas
